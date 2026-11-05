@@ -1,0 +1,1194 @@
+# Schema de core-identity: usuarios, roles, permisos y codigos de seguridad.
+# No incluye empresas: eso lo aporta core-multiempresa.
+databaseChangeLog:
+  - changeSet:
+      id: 2026-07-06-create-initial-schema-2
+      author: TaielMG
+      comment: Crea tabla auth_permissions
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          - tableExists:
+              tableName: auth_permissions
+      changes:
+        - createTable:
+            tableName: auth_permissions
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: status
+                  type: TINYINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uuid
+                  type: CHAR(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  name: id_user_created
+                  type: BIGINT
+              - column:
+                  name: id_user_updated
+                  type: BIGINT
+              - column:
+                  name: id_user_deleted
+                  type: BIGINT
+              - column:
+                  name: date_created
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_updated
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_deleted
+                  type: TIMESTAMP
+        - addUniqueConstraint:
+            tableName: auth_permissions
+            columnNames: uuid
+            constraintName: uk_auth_permissions_uuid
+      rollback:
+        - dropTable:
+            tableName: auth_permissions
+
+
+  - changeSet:
+      id: 2026-07-06-create-initial-schema-3
+      author: TaielMG
+      comment: Crea tabla auth_users
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          - tableExists:
+              tableName: auth_users
+      changes:
+        - createTable:
+            tableName: auth_users
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: VARCHAR(255)
+              - column:
+                  name: status
+                  type: TINYINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uuid
+                  type: CHAR(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+              - column:
+                  name: phone
+                  type: VARCHAR(255)
+              - column:
+                  name: department_name
+                  type: VARCHAR(255)
+              - column:
+                  name: group_name
+                  type: VARCHAR(255)
+              - column:
+                  name: sso_uuid
+                  type: VARCHAR(255)
+              - column:
+                  name: malvinas_legajo
+                  type: VARCHAR(255)
+              - column:
+                  name: verification_code
+                  type: VARCHAR(255)
+              - column:
+                  name: verification_code_expiry
+                  type: DATETIME(6)
+              - column:
+                  name: verification_code_last_sent
+                  type: DATETIME(6)
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+              - column:
+                  name: id_user_created
+                  type: BIGINT
+              - column:
+                  name: id_user_updated
+                  type: BIGINT
+              - column:
+                  name: id_user_deleted
+                  type: BIGINT
+              - column:
+                  name: date_created
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_updated
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_deleted
+                  type: TIMESTAMP
+        - addUniqueConstraint:
+            tableName: auth_users
+            columnNames: uuid
+            constraintName: uk_auth_users_uuid
+        - addUniqueConstraint:
+            tableName: auth_users
+            columnNames: username
+            constraintName: uk_auth_users_username
+      rollback:
+        - dropTable:
+            tableName: auth_users
+
+
+  - changeSet:
+      id: 2026-07-06-create-initial-schema-5
+      author: TaielMG
+      comment: Crea tabla auth_roles
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          - tableExists:
+              tableName: auth_roles
+      changes:
+        - createTable:
+            tableName: auth_roles
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: status
+                  type: TINYINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uuid
+                  type: CHAR(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_default
+                  type: TINYINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: company_id
+                  type: BIGINT
+              - column:
+                  name: id_user_created
+                  type: BIGINT
+              - column:
+                  name: id_user_updated
+                  type: BIGINT
+              - column:
+                  name: id_user_deleted
+                  type: BIGINT
+              - column:
+                  name: date_created
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_updated
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_deleted
+                  type: TIMESTAMP
+        - addUniqueConstraint:
+            tableName: auth_roles
+            columnNames: uuid
+            constraintName: uk_auth_roles_uuid
+      rollback:
+        - dropTable:
+            tableName: auth_roles
+
+
+  - changeSet:
+      id: 2026-07-06-create-initial-schema-7
+      author: TaielMG
+      comment: Crea tabla auth_roles_permissions
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          - tableExists:
+              tableName: auth_roles_permissions
+      changes:
+        - createTable:
+            tableName: auth_roles_permissions
+            columns:
+              - column:
+                  name: role_id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: permission_id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: auth_roles_permissions
+            baseColumnNames: role_id
+            referencedTableName: auth_roles
+            referencedColumnNames: id
+            constraintName: fk_auth_roles_permissions_role
+        - addForeignKeyConstraint:
+            baseTableName: auth_roles_permissions
+            baseColumnNames: permission_id
+            referencedTableName: auth_permissions
+            referencedColumnNames: id
+            constraintName: fk_auth_roles_permissions_permission
+      rollback:
+        - dropForeignKeyConstraint:
+            baseTableName: auth_roles_permissions
+            constraintName: fk_auth_roles_permissions_permission
+        - dropForeignKeyConstraint:
+            baseTableName: auth_roles_permissions
+            constraintName: fk_auth_roles_permissions_role
+        - dropTable:
+            tableName: auth_roles_permissions
+
+
+  - changeSet:
+      id: 2026-07-06-create-initial-schema-9
+      author: TaielMG
+      comment: Crea tabla security_code
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          - tableExists:
+              tableName: security_code
+      changes:
+        - createTable:
+            tableName: security_code
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: code
+                  type: VARCHAR(255)
+              - column:
+                  name: status
+                  type: TINYINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uuid
+                  type: CHAR(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: purpose
+                  type: VARCHAR(255)
+              - column:
+                  name: used
+                  type: TINYINT(1)
+              - column:
+                  name: created_at
+                  type: DATETIME(6)
+              - column:
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  name: id_user_created
+                  type: BIGINT
+              - column:
+                  name: id_user_updated
+                  type: BIGINT
+              - column:
+                  name: id_user_deleted
+                  type: BIGINT
+              - column:
+                  name: date_created
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_updated
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_deleted
+                  type: TIMESTAMP
+        - addUniqueConstraint:
+            tableName: security_code
+            columnNames: uuid
+            constraintName: uk_security_code_uuid
+        - addForeignKeyConstraint:
+            baseTableName: security_code
+            baseColumnNames: user_id
+            referencedTableName: auth_users
+            referencedColumnNames: id
+            constraintName: fk_security_code_user
+      rollback:
+        - dropForeignKeyConstraint:
+            baseTableName: security_code
+            constraintName: fk_security_code_user
+        - dropTable:
+            tableName: security_code
+
+  - changeSet:
+      id: 2026-09-19-security-code-used-boolean-postgresql
+      author: TaielMG
+      comment: En PostgreSQL TINYINT(1) queda como smallint y la entidad espera boolean; se convierte a boolean
+      dbms: postgresql
+      changes:
+        - sql:
+            sql: ALTER TABLE security_code ALTER COLUMN used TYPE boolean USING used <> 0
+
+  # Auditoria en espanol (glosario, ticket 02): auth_permissions
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-permissions-1
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_created de auth_permissions a id_usuario_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_permissions
+          columnName: id_user_created
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_permissions RENAME COLUMN id_user_created TO id_usuario_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_permissions RENAME COLUMN id_usuario_de_creacion TO id_user_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-permissions-2
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_updated de auth_permissions a id_usuario_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_permissions
+          columnName: id_user_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_permissions RENAME COLUMN id_user_updated TO id_usuario_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_permissions RENAME COLUMN id_usuario_de_actualizacion TO id_user_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-permissions-3
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_deleted de auth_permissions a id_usuario_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_permissions
+          columnName: id_user_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_permissions RENAME COLUMN id_user_deleted TO id_usuario_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_permissions RENAME COLUMN id_usuario_de_borrado TO id_user_deleted
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-permissions-4
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_created de auth_permissions a fecha_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_permissions
+          columnName: date_created
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_permissions RENAME COLUMN date_created TO fecha_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_permissions RENAME COLUMN fecha_de_creacion TO date_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-permissions-5
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_updated de auth_permissions a fecha_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_permissions
+          columnName: date_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_permissions RENAME COLUMN date_updated TO fecha_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_permissions RENAME COLUMN fecha_de_actualizacion TO date_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-permissions-6
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_deleted de auth_permissions a fecha_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_permissions
+          columnName: date_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_permissions RENAME COLUMN date_deleted TO fecha_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_permissions RENAME COLUMN fecha_de_borrado TO date_deleted
+
+  # Auditoria en espanol (glosario, ticket 02): auth_users
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-users-1
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_created de auth_users a id_usuario_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_users
+          columnName: id_user_created
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_users RENAME COLUMN id_user_created TO id_usuario_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_users RENAME COLUMN id_usuario_de_creacion TO id_user_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-users-2
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_updated de auth_users a id_usuario_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_users
+          columnName: id_user_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_users RENAME COLUMN id_user_updated TO id_usuario_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_users RENAME COLUMN id_usuario_de_actualizacion TO id_user_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-users-3
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_deleted de auth_users a id_usuario_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_users
+          columnName: id_user_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_users RENAME COLUMN id_user_deleted TO id_usuario_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_users RENAME COLUMN id_usuario_de_borrado TO id_user_deleted
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-users-4
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_created de auth_users a fecha_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_users
+          columnName: date_created
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_users RENAME COLUMN date_created TO fecha_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_users RENAME COLUMN fecha_de_creacion TO date_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-users-5
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_updated de auth_users a fecha_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_users
+          columnName: date_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_users RENAME COLUMN date_updated TO fecha_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_users RENAME COLUMN fecha_de_actualizacion TO date_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-users-6
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_deleted de auth_users a fecha_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_users
+          columnName: date_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_users RENAME COLUMN date_deleted TO fecha_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_users RENAME COLUMN fecha_de_borrado TO date_deleted
+
+  # Auditoria en espanol (glosario, ticket 02): auth_roles
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-roles-1
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_created de auth_roles a id_usuario_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_roles
+          columnName: id_user_created
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN id_user_created TO id_usuario_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN id_usuario_de_creacion TO id_user_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-roles-2
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_updated de auth_roles a id_usuario_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_roles
+          columnName: id_user_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN id_user_updated TO id_usuario_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN id_usuario_de_actualizacion TO id_user_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-roles-3
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_deleted de auth_roles a id_usuario_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_roles
+          columnName: id_user_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN id_user_deleted TO id_usuario_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN id_usuario_de_borrado TO id_user_deleted
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-roles-4
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_created de auth_roles a fecha_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_roles
+          columnName: date_created
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN date_created TO fecha_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN fecha_de_creacion TO date_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-roles-5
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_updated de auth_roles a fecha_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_roles
+          columnName: date_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN date_updated TO fecha_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN fecha_de_actualizacion TO date_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-roles-6
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_deleted de auth_roles a fecha_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_roles
+          columnName: date_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN date_deleted TO fecha_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN fecha_de_borrado TO date_deleted
+
+  # Auditoria en espanol (glosario, ticket 02): security_code
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-security-code-1
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_created de security_code a id_usuario_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: security_code
+          columnName: id_user_created
+      changes:
+        - sql:
+            sql: ALTER TABLE security_code RENAME COLUMN id_user_created TO id_usuario_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE security_code RENAME COLUMN id_usuario_de_creacion TO id_user_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-security-code-2
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_updated de security_code a id_usuario_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: security_code
+          columnName: id_user_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE security_code RENAME COLUMN id_user_updated TO id_usuario_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE security_code RENAME COLUMN id_usuario_de_actualizacion TO id_user_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-security-code-3
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_deleted de security_code a id_usuario_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: security_code
+          columnName: id_user_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE security_code RENAME COLUMN id_user_deleted TO id_usuario_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE security_code RENAME COLUMN id_usuario_de_borrado TO id_user_deleted
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-security-code-4
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_created de security_code a fecha_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: security_code
+          columnName: date_created
+      changes:
+        - sql:
+            sql: ALTER TABLE security_code RENAME COLUMN date_created TO fecha_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE security_code RENAME COLUMN fecha_de_creacion TO date_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-security-code-5
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_updated de security_code a fecha_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: security_code
+          columnName: date_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE security_code RENAME COLUMN date_updated TO fecha_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE security_code RENAME COLUMN fecha_de_actualizacion TO date_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-security-code-6
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_deleted de security_code a fecha_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: security_code
+          columnName: date_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE security_code RENAME COLUMN date_deleted TO fecha_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE security_code RENAME COLUMN fecha_de_borrado TO date_deleted
+
+  # Roles y permisos en espanol (glosario, ticket 05). Las FKs, PKs y constraints conservan su nombre [D15].
+  # La FK de auth_roles.id_empresa la agrega core-multiempresa (ver 2026-10-09-fk-auth-roles-id-empresa).
+  - changeSet:
+      id: 2026-10-09-renombrar-roles-y-permisos-1
+      author: TaielMG
+      comment: Renombra la tabla auth_permissions a auth_permisos
+      preConditions:
+        onFail: MARK_RAN
+        tableExists:
+          tableName: auth_permissions
+      changes:
+        - renameTable:
+            oldTableName: auth_permissions
+            newTableName: auth_permisos
+      rollback:
+        - renameTable:
+            oldTableName: auth_permisos
+            newTableName: auth_permissions
+
+  - changeSet:
+      id: 2026-10-09-renombrar-roles-y-permisos-2
+      author: TaielMG
+      comment: Renombra la columna name de auth_permisos a nombre
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_permisos
+          columnName: name
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_permisos RENAME COLUMN name TO nombre
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_permisos RENAME COLUMN nombre TO name
+
+  - changeSet:
+      id: 2026-10-09-renombrar-roles-y-permisos-3
+      author: TaielMG
+      comment: Renombra la columna description de auth_permisos a descripcion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_permisos
+          columnName: description
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_permisos RENAME COLUMN description TO descripcion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_permisos RENAME COLUMN descripcion TO description
+
+  - changeSet:
+      id: 2026-10-09-renombrar-roles-y-permisos-4
+      author: TaielMG
+      comment: Renombra la columna name de auth_roles a nombre
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_roles
+          columnName: name
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN name TO nombre
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN nombre TO name
+
+  - changeSet:
+      id: 2026-10-09-renombrar-roles-y-permisos-5
+      author: TaielMG
+      comment: Renombra la columna is_default de auth_roles a por_defecto
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_roles
+          columnName: is_default
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN is_default TO por_defecto
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN por_defecto TO is_default
+
+  - changeSet:
+      id: 2026-10-09-renombrar-roles-y-permisos-6
+      author: TaielMG
+      comment: Renombra la columna company_id de auth_roles a id_empresa. La FK fk_auth_roles_company (core-multiempresa) sigue a la columna
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_roles
+          columnName: company_id
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN company_id TO id_empresa
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_roles RENAME COLUMN id_empresa TO company_id
+
+  - changeSet:
+      id: 2026-10-09-renombrar-roles-y-permisos-7
+      author: TaielMG
+      comment: Renombra la tabla auth_roles_permissions a auth_roles_permisos
+      preConditions:
+        onFail: MARK_RAN
+        tableExists:
+          tableName: auth_roles_permissions
+      changes:
+        - renameTable:
+            oldTableName: auth_roles_permissions
+            newTableName: auth_roles_permisos
+      rollback:
+        - renameTable:
+            oldTableName: auth_roles_permisos
+            newTableName: auth_roles_permissions
+
+  - changeSet:
+      id: 2026-10-09-renombrar-roles-y-permisos-8
+      author: TaielMG
+      comment: Renombra la columna role_id de auth_roles_permisos a id_rol
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_roles_permisos
+          columnName: role_id
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_roles_permisos RENAME COLUMN role_id TO id_rol
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_roles_permisos RENAME COLUMN id_rol TO role_id
+
+  - changeSet:
+      id: 2026-10-09-renombrar-roles-y-permisos-9
+      author: TaielMG
+      comment: Renombra la columna permission_id de auth_roles_permisos a id_permiso
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_roles_permisos
+          columnName: permission_id
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_roles_permisos RENAME COLUMN permission_id TO id_permiso
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_roles_permisos RENAME COLUMN id_permiso TO permission_id
+
+  # Usuarios y codigos de seguridad en espanol (glosario, ticket 06). Las FKs, PKs y constraints conservan su
+  # nombre [D15]. Los modulos que crean una FK hacia auth_users (core-multiempresa, core-monoempresa,
+  # core-protocolo-jwt y core-protocolo-apikey) corren despues de este changelog: en una base nueva crean su tabla
+  # con la FK hacia auth_usuarios (ver 2026-10-09-create-*-fk-auth-usuarios en cada uno).
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-1
+      author: TaielMG
+      comment: Renombra la tabla auth_users a auth_usuarios. Las FKs de los otros modulos (auth_users_companies, auth_user_roles, auth_jwt_refresh_tokens, auth_user_access_tokens) siguen a la tabla
+      preConditions:
+        onFail: MARK_RAN
+        tableExists:
+          tableName: auth_users
+      changes:
+        - renameTable:
+            oldTableName: auth_users
+            newTableName: auth_usuarios
+      rollback:
+        - renameTable:
+            oldTableName: auth_usuarios
+            newTableName: auth_users
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-2
+      author: TaielMG
+      comment: Renombra la columna username de auth_usuarios a nombre_de_usuario
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios
+          columnName: username
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN username TO nombre_de_usuario
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN nombre_de_usuario TO username
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-3
+      author: TaielMG
+      comment: Renombra la columna password de auth_usuarios a contrasena
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios
+          columnName: password
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN password TO contrasena
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN contrasena TO password
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-4
+      author: TaielMG
+      comment: Renombra la columna name de auth_usuarios a nombre
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios
+          columnName: name
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN name TO nombre
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN nombre TO name
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-5
+      author: TaielMG
+      comment: Renombra la columna phone de auth_usuarios a telefono
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios
+          columnName: phone
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN phone TO telefono
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN telefono TO phone
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-6
+      author: TaielMG
+      comment: Renombra la columna department_name de auth_usuarios a nombre_de_departamento
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios
+          columnName: department_name
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN department_name TO nombre_de_departamento
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN nombre_de_departamento TO department_name
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-7
+      author: TaielMG
+      comment: Renombra la columna group_name de auth_usuarios a nombre_de_grupo
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios
+          columnName: group_name
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN group_name TO nombre_de_grupo
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN nombre_de_grupo TO group_name
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-8
+      author: TaielMG
+      comment: Renombra la columna verification_code de auth_usuarios a codigo_de_verificacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios
+          columnName: verification_code
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN verification_code TO codigo_de_verificacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN codigo_de_verificacion TO verification_code
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-9
+      author: TaielMG
+      comment: Renombra la columna verification_code_expiry de auth_usuarios a vencimiento_del_codigo_de_verificacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios
+          columnName: verification_code_expiry
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN verification_code_expiry TO vencimiento_del_codigo_de_verificacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN vencimiento_del_codigo_de_verificacion TO verification_code_expiry
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-10
+      author: TaielMG
+      comment: Renombra la columna verification_code_last_sent de auth_usuarios a ultimo_envio_del_codigo_de_verificacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios
+          columnName: verification_code_last_sent
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN verification_code_last_sent TO ultimo_envio_del_codigo_de_verificacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios RENAME COLUMN ultimo_envio_del_codigo_de_verificacion TO verification_code_last_sent
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-11
+      author: TaielMG
+      comment: Renombra la tabla security_code a codigos_de_seguridad
+      preConditions:
+        onFail: MARK_RAN
+        tableExists:
+          tableName: security_code
+      changes:
+        - renameTable:
+            oldTableName: security_code
+            newTableName: codigos_de_seguridad
+      rollback:
+        - renameTable:
+            oldTableName: codigos_de_seguridad
+            newTableName: security_code
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-12
+      author: TaielMG
+      comment: Renombra la columna code de codigos_de_seguridad a codigo
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: codigos_de_seguridad
+          columnName: code
+      changes:
+        - sql:
+            sql: ALTER TABLE codigos_de_seguridad RENAME COLUMN code TO codigo
+      rollback:
+        - sql:
+            sql: ALTER TABLE codigos_de_seguridad RENAME COLUMN codigo TO code
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-13
+      author: TaielMG
+      comment: Renombra la columna purpose de codigos_de_seguridad a proposito
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: codigos_de_seguridad
+          columnName: purpose
+      changes:
+        - sql:
+            sql: ALTER TABLE codigos_de_seguridad RENAME COLUMN purpose TO proposito
+      rollback:
+        - sql:
+            sql: ALTER TABLE codigos_de_seguridad RENAME COLUMN proposito TO purpose
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-14
+      author: TaielMG
+      comment: Renombra la columna used de codigos_de_seguridad a usado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: codigos_de_seguridad
+          columnName: used
+      changes:
+        - sql:
+            sql: ALTER TABLE codigos_de_seguridad RENAME COLUMN used TO usado
+      rollback:
+        - sql:
+            sql: ALTER TABLE codigos_de_seguridad RENAME COLUMN usado TO used
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-15
+      author: TaielMG
+      comment: Renombra la columna created_at de codigos_de_seguridad a fecha_de_emision
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: codigos_de_seguridad
+          columnName: created_at
+      changes:
+        - sql:
+            sql: ALTER TABLE codigos_de_seguridad RENAME COLUMN created_at TO fecha_de_emision
+      rollback:
+        - sql:
+            sql: ALTER TABLE codigos_de_seguridad RENAME COLUMN fecha_de_emision TO created_at
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-y-codigos-de-seguridad-16
+      author: TaielMG
+      comment: Renombra la columna user_id de codigos_de_seguridad a id_usuario. La FK fk_security_code_user sigue a la columna
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: codigos_de_seguridad
+          columnName: user_id
+      changes:
+        - sql:
+            sql: ALTER TABLE codigos_de_seguridad RENAME COLUMN user_id TO id_usuario
+      rollback:
+        - sql:
+            sql: ALTER TABLE codigos_de_seguridad RENAME COLUMN id_usuario TO user_id

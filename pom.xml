@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.1.1</version>
+        <relativePath/>
+    </parent>
+
+    <!--
+      Padre del Core. Versiona todos los modulos core-* juntos y se publica con ellos en el repositorio Maven publico
+      https://sm-soluciones.github.io/sm-core-maven (GitHub Pages, workflow publicar.yml).
+      Un proyecto lo usa como <parent> de su app/pom.xml: hereda la dependencyManagement de los core-* (con
+      ${core.version}), Lombok y la configuracion del compilador, surefire y failsafe.
+    -->
+    <groupId>com.blue.open</groupId>
+    <artifactId>core-parent</artifactId>
+    <version>4.0.0</version>
+    <packaging>pom</packaging>
+    <name>core-parent</name>
+    <description>Core compartido de BlueOpenData: modulos Maven que usan todos los proyectos</description>
+    <url>https://github.com/SM-SOLUCIONES/sm-core-maven</url>
+
+    <scm>
+        <connection>scm:git:https://github.com/SM-SOLUCIONES/sm-core-maven.git</connection>
+        <developerConnection>scm:git:https://github.com/SM-SOLUCIONES/sm-core-maven.git</developerConnection>
+        <url>https://github.com/SM-SOLUCIONES/sm-core-maven</url>
+    </scm>
+
+    <properties>
+        <java.version>25</java.version>
+        <!-- Version del Core: literal e igual al <version> de arriba. No puede ser ${project.version}: en un proyecto que
+             hereda este pom se resolveria con la version de la app, no con la del Core -->
+        <core.version>4.0.0</core.version>
+        <lombok.version>1.18.44</lombok.version>
+    </properties>
+
+    <modules>
+        <module>core-kernel</module>
+        <module>core-crud</module>
+        <module>core-identity</module>
+        <module>core-monoempresa</module>
+        <module>core-multiempresa</module>
+        <module>core-protocolo-jwt</module>
+        <module>core-protocolo-apikey</module>
+        <module>core-protocolo-sso</module>
+        <module>core-mail</module>
+        <module>core-crypter</module>
+        <module>core-sm3</module>
+        <module>core-captcha</module>
+        <module>core-test</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Version de los binarios de PostgreSQL de embedded-postgres (core-test): la misma major que la base real (PostgreSQL 18) -->
+            <dependency>
+                <groupId>io.zonky.test.postgres</groupId>
+                <artifactId>embedded-postgres-binaries-bom</artifactId>
+                <version>18.6.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.blue.open</groupId>
+                <artifactId>core-kernel</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.blue.open</groupId>
+                <artifactId>core-crud</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.blue.open</groupId>
+                <artifactId>core-identity</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.blue.open</groupId>
+                <artifactId>core-monoempresa</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.blue.open</groupId>
+                <artifactId>core-multiempresa</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.blue.open</groupId>
+                <artifactId>core-protocolo-jwt</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.blue.open</groupId>
+                <artifactId>core-protocolo-apikey</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.blue.open</groupId>
+                <artifactId>core-protocolo-sso</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.blue.open</groupId>
+                <artifactId>core-mail</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.blue.open</groupId>
+                <artifactId>core-crypter</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.blue.open</groupId>
+                <artifactId>core-sm3</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.blue.open</groupId>
+                <artifactId>core-captcha</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.blue.open</groupId>
+                <artifactId>core-test</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.15.0</version>
+                    <configuration>
+                        <release>${java.version}</release>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.6.0</version>
+                    <configuration>
+                        <argLine>
+                            --add-opens java.base/java.lang=ALL-UNNAMED
+                            --add-opens java.base/java.util=ALL-UNNAMED
+                        </argLine>
+                        <excludes>
+                            <exclude>**/*IT.java</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.6.0</version>
+                    <configuration>
+                        <argLine>
+                            --add-opens java.base/java.lang=ALL-UNNAMED
+                            --add-opens java.base/java.util=ALL-UNNAMED
+                        </argLine>
+                        <includes>
+                            <include>**/*IT.java</include>
+                        </includes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- Solo lo activa el workflow publicar.yml (-Ppublicar): adjunta el jar de fuentes de cada modulo. Un proyecto
+             que hereda este pom no lo activa, asi que su build no cambia -->
+        <profile>
+            <id>publicar</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>fuentes</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

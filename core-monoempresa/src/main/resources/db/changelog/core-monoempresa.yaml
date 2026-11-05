@@ -1,0 +1,331 @@
+# Schema de core-monoempresa: vinculo directo usuario-rol, sin empresas.
+# Es la alternativa a core-multiempresa: un proyecto incluye uno de los dos, nunca los dos.
+databaseChangeLog:
+  # Usuarios en espanol (glosario, ticket 06). core-identity renombra auth_users a auth_usuarios antes de que corra
+  # este changelog. En una base nueva este changeset crea auth_user_roles con la FK hacia auth_usuarios (el
+  # nombre de la FK queda [D15]) y core-monoempresa-1, que la apunta a auth_users, queda MARK_RAN por su
+  # precondicion. En una base existente la tabla ya existe (su FK sigue a la tabla renombrada) y este queda MARK_RAN.
+  # Su rollback no hace nada: Liquibase tambien revierte los changesets MARK_RAN, y la tabla la borra el rollback de
+  # core-monoempresa-1 (en una base nueva queda MARK_RAN despues de este, asi que se revierte antes).
+  - changeSet:
+      id: 2026-10-09-create-auth-user-roles-fk-auth-usuarios
+      author: TaielMG
+      comment: Crea tabla auth_user_roles con la FK hacia auth_usuarios (base nueva)
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: auth_usuarios
+        - not:
+            - tableExists:
+                tableName: auth_user_roles
+      changes:
+        - createTable:
+            tableName: auth_user_roles
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: status
+                  type: TINYINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uuid
+                  type: CHAR(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: BIGINT
+              - column:
+                  name: id_user_created
+                  type: BIGINT
+              - column:
+                  name: id_user_updated
+                  type: BIGINT
+              - column:
+                  name: id_user_deleted
+                  type: BIGINT
+              - column:
+                  name: date_created
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_updated
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_deleted
+                  type: TIMESTAMP
+        - addUniqueConstraint:
+            tableName: auth_user_roles
+            columnNames: uuid
+            constraintName: uk_auth_user_roles_uuid
+        - addForeignKeyConstraint:
+            baseTableName: auth_user_roles
+            baseColumnNames: user_id
+            referencedTableName: auth_usuarios
+            referencedColumnNames: id
+            constraintName: fk_auth_user_roles_user
+        - addForeignKeyConstraint:
+            baseTableName: auth_user_roles
+            baseColumnNames: role_id
+            referencedTableName: auth_roles
+            referencedColumnNames: id
+            constraintName: fk_auth_user_roles_role
+      rollback:
+        - output:
+            message: Sin efecto. La tabla la borra el rollback de core-monoempresa-1
+
+  - changeSet:
+      id: core-monoempresa-1
+      author: TaielMG
+      comment: Crea tabla auth_user_roles
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          - tableExists:
+              tableName: auth_user_roles
+      changes:
+        - createTable:
+            tableName: auth_user_roles
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: status
+                  type: TINYINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uuid
+                  type: CHAR(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: BIGINT
+              - column:
+                  name: id_user_created
+                  type: BIGINT
+              - column:
+                  name: id_user_updated
+                  type: BIGINT
+              - column:
+                  name: id_user_deleted
+                  type: BIGINT
+              - column:
+                  name: date_created
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_updated
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_deleted
+                  type: TIMESTAMP
+        - addUniqueConstraint:
+            tableName: auth_user_roles
+            columnNames: uuid
+            constraintName: uk_auth_user_roles_uuid
+        - addForeignKeyConstraint:
+            baseTableName: auth_user_roles
+            baseColumnNames: user_id
+            referencedTableName: auth_users
+            referencedColumnNames: id
+            constraintName: fk_auth_user_roles_user
+        - addForeignKeyConstraint:
+            baseTableName: auth_user_roles
+            baseColumnNames: role_id
+            referencedTableName: auth_roles
+            referencedColumnNames: id
+            constraintName: fk_auth_user_roles_role
+      rollback:
+        - dropForeignKeyConstraint:
+            baseTableName: auth_user_roles
+            constraintName: fk_auth_user_roles_role
+        - dropForeignKeyConstraint:
+            baseTableName: auth_user_roles
+            constraintName: fk_auth_user_roles_user
+        - dropTable:
+            tableName: auth_user_roles
+
+  # Auditoria en espanol (glosario, ticket 02): auth_user_roles
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-user-roles-1
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_created de auth_user_roles a id_usuario_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_user_roles
+          columnName: id_user_created
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_user_roles RENAME COLUMN id_user_created TO id_usuario_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_user_roles RENAME COLUMN id_usuario_de_creacion TO id_user_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-user-roles-2
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_updated de auth_user_roles a id_usuario_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_user_roles
+          columnName: id_user_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_user_roles RENAME COLUMN id_user_updated TO id_usuario_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_user_roles RENAME COLUMN id_usuario_de_actualizacion TO id_user_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-user-roles-3
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_deleted de auth_user_roles a id_usuario_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_user_roles
+          columnName: id_user_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_user_roles RENAME COLUMN id_user_deleted TO id_usuario_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_user_roles RENAME COLUMN id_usuario_de_borrado TO id_user_deleted
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-user-roles-4
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_created de auth_user_roles a fecha_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_user_roles
+          columnName: date_created
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_user_roles RENAME COLUMN date_created TO fecha_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_user_roles RENAME COLUMN fecha_de_creacion TO date_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-user-roles-5
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_updated de auth_user_roles a fecha_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_user_roles
+          columnName: date_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_user_roles RENAME COLUMN date_updated TO fecha_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_user_roles RENAME COLUMN fecha_de_actualizacion TO date_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-user-roles-6
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_deleted de auth_user_roles a fecha_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_user_roles
+          columnName: date_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_user_roles RENAME COLUMN date_deleted TO fecha_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_user_roles RENAME COLUMN fecha_de_borrado TO date_deleted
+
+  # Monoempresa en espanol (glosario, ticket 07). Las FKs, PKs y constraints conservan su nombre [D15]. Ningun otro
+  # modulo crea una FK hacia auth_user_roles: en una base nueva la tabla se crea con el nombre viejo y se renombra aca.
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-roles-1
+      author: TaielMG
+      comment: Renombra la tabla auth_user_roles a auth_usuarios_roles
+      preConditions:
+        onFail: MARK_RAN
+        tableExists:
+          tableName: auth_user_roles
+      changes:
+        - renameTable:
+            oldTableName: auth_user_roles
+            newTableName: auth_usuarios_roles
+      rollback:
+        - renameTable:
+            oldTableName: auth_usuarios_roles
+            newTableName: auth_user_roles
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-roles-2
+      author: TaielMG
+      comment: Renombra la columna user_id de auth_usuarios_roles a id_usuario
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios_roles
+          columnName: user_id
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios_roles RENAME COLUMN user_id TO id_usuario
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios_roles RENAME COLUMN id_usuario TO user_id
+
+  - changeSet:
+      id: 2026-10-09-renombrar-usuarios-roles-3
+      author: TaielMG
+      comment: Renombra la columna role_id de auth_usuarios_roles a id_rol
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios_roles
+          columnName: role_id
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios_roles RENAME COLUMN role_id TO id_rol
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios_roles RENAME COLUMN id_rol TO role_id

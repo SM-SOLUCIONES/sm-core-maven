@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.blue.open</groupId>
+        <artifactId>core-parent</artifactId>
+        <version>4.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <!--
+      Soporte de las pruebas de contrato. El proyecto lo declara con scope test: nada de este modulo llega al jar.
+      Ver core/docs/arquitectura/testing/README.md
+    -->
+    <artifactId>core-test</artifactId>
+    <name>core-test</name>
+    <properties>
+        <victools.version>5.0.0</victools.version>
+    </properties>
+    <dependencies>
+        <dependency><groupId>com.blue.open</groupId><artifactId>core-kernel</artifactId></dependency>
+        <!-- Opcionales: el doble de Crypter y la prueba de heredados solo se activan si el proyecto usa esos modulos -->
+        <dependency><groupId>com.blue.open</groupId><artifactId>core-crypter</artifactId><optional>true</optional></dependency>
+        <dependency><groupId>com.blue.open</groupId><artifactId>core-crud</artifactId><optional>true</optional></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-webmvc-test</artifactId></dependency>
+        <dependency><groupId>org.junit.platform</groupId><artifactId>junit-platform-launcher</artifactId></dependency>
+        <!-- PostgreSQL real embebido, sin Docker (version de los binarios en el pom raiz) -->
+        <dependency><groupId>io.zonky.test</groupId><artifactId>embedded-postgres</artifactId><version>2.2.2</version></dependency>
+        <!-- Emisor del contrato: schema JSON desde la clase DTO, validacion de la respuesta real y salida en YAML -->
+        <dependency><groupId>com.github.victools</groupId><artifactId>jsonschema-generator</artifactId><version>${victools.version}</version></dependency>
+        <dependency><groupId>com.github.victools</groupId><artifactId>jsonschema-module-jackson</artifactId><version>${victools.version}</version></dependency>
+        <dependency><groupId>com.github.victools</groupId><artifactId>jsonschema-module-jakarta-validation</artifactId><version>${victools.version}</version></dependency>
+        <!-- 3.0.5: compilado contra Jackson 3.1, la misma minor que fija Spring Boot 4.1 -->
+        <dependency><groupId>com.networknt</groupId><artifactId>json-schema-validator</artifactId><version>3.0.5</version></dependency>
+        <dependency><groupId>tools.jackson.dataformat</groupId><artifactId>jackson-dataformat-yaml</artifactId></dependency>
+    </dependencies>
+</project>

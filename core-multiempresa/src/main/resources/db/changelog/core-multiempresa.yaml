@@ -1,0 +1,749 @@
+# Schema de core-multiempresa: empresas y el scoping de roles por empresa.
+# Un proyecto mono-empresa no incluye este changelog y no crea estas tablas.
+databaseChangeLog:
+  - changeSet:
+      id: 2026-07-06-create-initial-schema-1
+      author: TaielMG
+      comment: Crea tabla companies
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          - tableExists:
+              tableName: companies
+      changes:
+        - createTable:
+            tableName: companies
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: status
+                  type: TINYINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uuid
+                  type: CHAR(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: code
+                  type: VARCHAR(255)
+              - column:
+                  name: path
+                  type: VARCHAR(255)
+              - column:
+                  name: balance
+                  type: DOUBLE
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  name: id_user_created
+                  type: BIGINT
+              - column:
+                  name: id_user_updated
+                  type: BIGINT
+              - column:
+                  name: id_user_deleted
+                  type: BIGINT
+              - column:
+                  name: date_created
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_updated
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_deleted
+                  type: TIMESTAMP
+        - addUniqueConstraint:
+            tableName: companies
+            columnNames: uuid
+            constraintName: uk_companies_uuid
+      rollback:
+        - dropTable:
+            tableName: companies
+
+
+  # Usuarios en espanol (glosario, ticket 06). core-identity renombra auth_users a auth_usuarios antes de que corra
+  # este changelog. En una base nueva este changeset crea auth_users_companies con la FK hacia auth_usuarios (el
+  # nombre de la FK queda [D15]) y 2026-07-06-create-initial-schema-6, que la apunta a auth_users, queda MARK_RAN por su
+  # precondicion. En una base existente la tabla ya existe (su FK sigue a la tabla renombrada) y este queda MARK_RAN.
+  # Su rollback no hace nada: Liquibase tambien revierte los changesets MARK_RAN, y la tabla la borra el rollback de
+  # 2026-07-06-create-initial-schema-6 (en una base nueva queda MARK_RAN despues de este, asi que se revierte antes).
+  - changeSet:
+      id: 2026-10-09-create-auth-users-companies-fk-auth-usuarios
+      author: TaielMG
+      comment: Crea tabla auth_users_companies con la FK hacia auth_usuarios (base nueva)
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: auth_usuarios
+        - not:
+            - tableExists:
+                tableName: auth_users_companies
+      changes:
+        - createTable:
+            tableName: auth_users_companies
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: status
+                  type: TINYINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uuid
+                  type: CHAR(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  name: company_id
+                  type: BIGINT
+              - column:
+                  name: id_user_created
+                  type: BIGINT
+              - column:
+                  name: id_user_updated
+                  type: BIGINT
+              - column:
+                  name: id_user_deleted
+                  type: BIGINT
+              - column:
+                  name: date_created
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_updated
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_deleted
+                  type: TIMESTAMP
+        - addUniqueConstraint:
+            tableName: auth_users_companies
+            columnNames: uuid
+            constraintName: uk_auth_users_companies_uuid
+        - addForeignKeyConstraint:
+            baseTableName: auth_users_companies
+            baseColumnNames: user_id
+            referencedTableName: auth_usuarios
+            referencedColumnNames: id
+            constraintName: fk_auth_users_companies_user
+        - addForeignKeyConstraint:
+            baseTableName: auth_users_companies
+            baseColumnNames: company_id
+            referencedTableName: companies
+            referencedColumnNames: id
+            constraintName: fk_auth_users_companies_company
+      rollback:
+        - output:
+            message: Sin efecto. La tabla la borra el rollback de 2026-07-06-create-initial-schema-6
+
+  - changeSet:
+      id: 2026-07-06-create-initial-schema-6
+      author: TaielMG
+      comment: Crea tabla auth_users_companies
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          - tableExists:
+              tableName: auth_users_companies
+      changes:
+        - createTable:
+            tableName: auth_users_companies
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: status
+                  type: TINYINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uuid
+                  type: CHAR(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  name: company_id
+                  type: BIGINT
+              - column:
+                  name: id_user_created
+                  type: BIGINT
+              - column:
+                  name: id_user_updated
+                  type: BIGINT
+              - column:
+                  name: id_user_deleted
+                  type: BIGINT
+              - column:
+                  name: date_created
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_updated
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_deleted
+                  type: TIMESTAMP
+        - addUniqueConstraint:
+            tableName: auth_users_companies
+            columnNames: uuid
+            constraintName: uk_auth_users_companies_uuid
+        - addForeignKeyConstraint:
+            baseTableName: auth_users_companies
+            baseColumnNames: user_id
+            referencedTableName: auth_users
+            referencedColumnNames: id
+            constraintName: fk_auth_users_companies_user
+        - addForeignKeyConstraint:
+            baseTableName: auth_users_companies
+            baseColumnNames: company_id
+            referencedTableName: companies
+            referencedColumnNames: id
+            constraintName: fk_auth_users_companies_company
+      rollback:
+        - dropForeignKeyConstraint:
+            baseTableName: auth_users_companies
+            constraintName: fk_auth_users_companies_company
+        - dropForeignKeyConstraint:
+            baseTableName: auth_users_companies
+            constraintName: fk_auth_users_companies_user
+        - dropTable:
+            tableName: auth_users_companies
+
+
+  - changeSet:
+      id: 2026-07-06-create-initial-schema-8
+      author: TaielMG
+      comment: Crea tabla auth_user_company_roles
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          - tableExists:
+              tableName: auth_user_company_roles
+      changes:
+        - createTable:
+            tableName: auth_user_company_roles
+            columns:
+              - column:
+                  name: user_company_role_id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: auth_user_company_roles
+            baseColumnNames: user_company_role_id
+            referencedTableName: auth_users_companies
+            referencedColumnNames: id
+            constraintName: fk_auth_user_company_roles_user_company_role
+        - addForeignKeyConstraint:
+            baseTableName: auth_user_company_roles
+            baseColumnNames: role_id
+            referencedTableName: auth_roles
+            referencedColumnNames: id
+            constraintName: fk_auth_user_company_roles_role
+      rollback:
+        - dropForeignKeyConstraint:
+            baseTableName: auth_user_company_roles
+            constraintName: fk_auth_user_company_roles_role
+        - dropForeignKeyConstraint:
+            baseTableName: auth_user_company_roles
+            constraintName: fk_auth_user_company_roles_user_company_role
+        - dropTable:
+            tableName: auth_user_company_roles
+
+  # Roles y permisos en espanol (glosario, ticket 05). core-identity renombra auth_roles.company_id a id_empresa
+  # antes de que corra este changelog. En una base nueva este changeset crea la FK sobre id_empresa con el nombre de
+  # siempre [D15], y core-multiempresa-fk-auth-roles-company (que nombra company_id) queda MARK_RAN por su
+  # precondicion. En una base existente la FK ya existe (sigue a la columna renombrada) y este queda MARK_RAN.
+  # Su rollback no hace nada: Liquibase tambien revierte los changesets MARK_RAN, y la FK la borra el rollback de
+  # core-multiempresa-fk-auth-roles-company (en una base nueva queda MARK_RAN despues de este, asi que se revierte antes).
+  - changeSet:
+      id: 2026-10-09-fk-auth-roles-id-empresa
+      author: TaielMG
+      comment: Agrega la FK de auth_roles.id_empresa a companies si todavia no existe
+      preConditions:
+        - onFail: MARK_RAN
+        - columnExists:
+            tableName: auth_roles
+            columnName: id_empresa
+        - not:
+            - foreignKeyConstraintExists:
+                foreignKeyName: fk_auth_roles_company
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: auth_roles
+            baseColumnNames: id_empresa
+            referencedTableName: companies
+            referencedColumnNames: id
+            constraintName: fk_auth_roles_company
+      rollback:
+        - output:
+            message: Sin efecto. La FK la borra el rollback de core-multiempresa-fk-auth-roles-company
+
+  - changeSet:
+      id: core-multiempresa-fk-auth-roles-company
+      author: TaielMG
+      comment: Agrega la FK de auth_roles.company_id a companies. La columna la crea core-identity sin FK, para que un proyecto mono-empresa pueda tenerla en null sin depender de este modulo.
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          - foreignKeyConstraintExists:
+              foreignKeyName: fk_auth_roles_company
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: auth_roles
+            baseColumnNames: company_id
+            referencedTableName: companies
+            referencedColumnNames: id
+            constraintName: fk_auth_roles_company
+      rollback:
+        - dropForeignKeyConstraint:
+            baseTableName: auth_roles
+            constraintName: fk_auth_roles_company
+
+  # Auditoria en espanol (glosario, ticket 02): companies
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-companies-1
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_created de companies a id_usuario_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: companies
+          columnName: id_user_created
+      changes:
+        - sql:
+            sql: ALTER TABLE companies RENAME COLUMN id_user_created TO id_usuario_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE companies RENAME COLUMN id_usuario_de_creacion TO id_user_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-companies-2
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_updated de companies a id_usuario_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: companies
+          columnName: id_user_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE companies RENAME COLUMN id_user_updated TO id_usuario_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE companies RENAME COLUMN id_usuario_de_actualizacion TO id_user_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-companies-3
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_deleted de companies a id_usuario_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: companies
+          columnName: id_user_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE companies RENAME COLUMN id_user_deleted TO id_usuario_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE companies RENAME COLUMN id_usuario_de_borrado TO id_user_deleted
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-companies-4
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_created de companies a fecha_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: companies
+          columnName: date_created
+      changes:
+        - sql:
+            sql: ALTER TABLE companies RENAME COLUMN date_created TO fecha_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE companies RENAME COLUMN fecha_de_creacion TO date_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-companies-5
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_updated de companies a fecha_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: companies
+          columnName: date_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE companies RENAME COLUMN date_updated TO fecha_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE companies RENAME COLUMN fecha_de_actualizacion TO date_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-companies-6
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_deleted de companies a fecha_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: companies
+          columnName: date_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE companies RENAME COLUMN date_deleted TO fecha_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE companies RENAME COLUMN fecha_de_borrado TO date_deleted
+
+  # Auditoria en espanol (glosario, ticket 02): auth_users_companies
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-users-companies-1
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_created de auth_users_companies a id_usuario_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_users_companies
+          columnName: id_user_created
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_users_companies RENAME COLUMN id_user_created TO id_usuario_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_users_companies RENAME COLUMN id_usuario_de_creacion TO id_user_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-users-companies-2
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_updated de auth_users_companies a id_usuario_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_users_companies
+          columnName: id_user_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_users_companies RENAME COLUMN id_user_updated TO id_usuario_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_users_companies RENAME COLUMN id_usuario_de_actualizacion TO id_user_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-users-companies-3
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_deleted de auth_users_companies a id_usuario_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_users_companies
+          columnName: id_user_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_users_companies RENAME COLUMN id_user_deleted TO id_usuario_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_users_companies RENAME COLUMN id_usuario_de_borrado TO id_user_deleted
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-users-companies-4
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_created de auth_users_companies a fecha_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_users_companies
+          columnName: date_created
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_users_companies RENAME COLUMN date_created TO fecha_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_users_companies RENAME COLUMN fecha_de_creacion TO date_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-users-companies-5
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_updated de auth_users_companies a fecha_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_users_companies
+          columnName: date_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_users_companies RENAME COLUMN date_updated TO fecha_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_users_companies RENAME COLUMN fecha_de_actualizacion TO date_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-users-companies-6
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_deleted de auth_users_companies a fecha_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_users_companies
+          columnName: date_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_users_companies RENAME COLUMN date_deleted TO fecha_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_users_companies RENAME COLUMN fecha_de_borrado TO date_deleted
+
+  # Multiempresa en espanol (glosario, ticket 07). Las FKs, PKs y constraints conservan su nombre [D15], y las FKs
+  # siguen a las tablas y columnas renombradas. Ningun modulo que corre despues de este changelog crea una FK hacia
+  # estas tablas: en una base nueva se crean con el nombre viejo y se renombran aca. La columna cuit de empresas es
+  # del proyecto y la migra el changelog del proyecto.
+
+  - changeSet:
+      id: 2026-10-09-renombrar-empresas-y-relaciones-1
+      author: TaielMG
+      comment: Renombra la tabla companies a empresas
+      preConditions:
+        onFail: MARK_RAN
+        tableExists:
+          tableName: companies
+      changes:
+        - renameTable:
+            oldTableName: companies
+            newTableName: empresas
+      rollback:
+        - renameTable:
+            oldTableName: empresas
+            newTableName: companies
+
+  - changeSet:
+      id: 2026-10-09-renombrar-empresas-y-relaciones-2
+      author: TaielMG
+      comment: Renombra la columna name de empresas a nombre
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: empresas
+          columnName: name
+      changes:
+        - sql:
+            sql: ALTER TABLE empresas RENAME COLUMN name TO nombre
+      rollback:
+        - sql:
+            sql: ALTER TABLE empresas RENAME COLUMN nombre TO name
+
+  - changeSet:
+      id: 2026-10-09-renombrar-empresas-y-relaciones-3
+      author: TaielMG
+      comment: Renombra la columna description de empresas a descripcion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: empresas
+          columnName: description
+      changes:
+        - sql:
+            sql: ALTER TABLE empresas RENAME COLUMN description TO descripcion
+      rollback:
+        - sql:
+            sql: ALTER TABLE empresas RENAME COLUMN descripcion TO description
+
+  - changeSet:
+      id: 2026-10-09-renombrar-empresas-y-relaciones-4
+      author: TaielMG
+      comment: Renombra la columna path de empresas a ruta
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: empresas
+          columnName: path
+      changes:
+        - sql:
+            sql: ALTER TABLE empresas RENAME COLUMN path TO ruta
+      rollback:
+        - sql:
+            sql: ALTER TABLE empresas RENAME COLUMN ruta TO path
+
+  - changeSet:
+      id: 2026-10-09-renombrar-empresas-y-relaciones-5
+      author: TaielMG
+      comment: Renombra la columna code de empresas a codigo
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: empresas
+          columnName: code
+      changes:
+        - sql:
+            sql: ALTER TABLE empresas RENAME COLUMN code TO codigo
+      rollback:
+        - sql:
+            sql: ALTER TABLE empresas RENAME COLUMN codigo TO code
+
+  - changeSet:
+      id: 2026-10-09-renombrar-empresas-y-relaciones-6
+      author: TaielMG
+      comment: Renombra la columna balance de empresas a saldo
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: empresas
+          columnName: balance
+      changes:
+        - sql:
+            sql: ALTER TABLE empresas RENAME COLUMN balance TO saldo
+      rollback:
+        - sql:
+            sql: ALTER TABLE empresas RENAME COLUMN saldo TO balance
+
+  - changeSet:
+      id: 2026-10-09-renombrar-empresas-y-relaciones-7
+      author: TaielMG
+      comment: Renombra la tabla auth_users_companies a auth_usuarios_empresas
+      preConditions:
+        onFail: MARK_RAN
+        tableExists:
+          tableName: auth_users_companies
+      changes:
+        - renameTable:
+            oldTableName: auth_users_companies
+            newTableName: auth_usuarios_empresas
+      rollback:
+        - renameTable:
+            oldTableName: auth_usuarios_empresas
+            newTableName: auth_users_companies
+
+  - changeSet:
+      id: 2026-10-09-renombrar-empresas-y-relaciones-8
+      author: TaielMG
+      comment: Renombra la columna user_id de auth_usuarios_empresas a id_usuario
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios_empresas
+          columnName: user_id
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios_empresas RENAME COLUMN user_id TO id_usuario
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios_empresas RENAME COLUMN id_usuario TO user_id
+
+  - changeSet:
+      id: 2026-10-09-renombrar-empresas-y-relaciones-9
+      author: TaielMG
+      comment: Renombra la columna company_id de auth_usuarios_empresas a id_empresa
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios_empresas
+          columnName: company_id
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios_empresas RENAME COLUMN company_id TO id_empresa
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios_empresas RENAME COLUMN id_empresa TO company_id
+
+  - changeSet:
+      id: 2026-10-09-renombrar-empresas-y-relaciones-10
+      author: TaielMG
+      comment: Renombra la tabla auth_user_company_roles a auth_usuarios_empresas_roles
+      preConditions:
+        onFail: MARK_RAN
+        tableExists:
+          tableName: auth_user_company_roles
+      changes:
+        - renameTable:
+            oldTableName: auth_user_company_roles
+            newTableName: auth_usuarios_empresas_roles
+      rollback:
+        - renameTable:
+            oldTableName: auth_usuarios_empresas_roles
+            newTableName: auth_user_company_roles
+
+  - changeSet:
+      id: 2026-10-09-renombrar-empresas-y-relaciones-11
+      author: TaielMG
+      comment: Renombra la columna user_company_role_id de auth_usuarios_empresas_roles a id_usuario_empresa
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios_empresas_roles
+          columnName: user_company_role_id
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios_empresas_roles RENAME COLUMN user_company_role_id TO id_usuario_empresa
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios_empresas_roles RENAME COLUMN id_usuario_empresa TO user_company_role_id
+
+  - changeSet:
+      id: 2026-10-09-renombrar-empresas-y-relaciones-12
+      author: TaielMG
+      comment: Renombra la columna role_id de auth_usuarios_empresas_roles a id_rol
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_usuarios_empresas_roles
+          columnName: role_id
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_usuarios_empresas_roles RENAME COLUMN role_id TO id_rol
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_usuarios_empresas_roles RENAME COLUMN id_rol TO role_id
