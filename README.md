@@ -95,6 +95,9 @@ Semver: cambio que rompe compatibilidad → major; módulo o puerto nuevo → mi
    git push origin v4.1.0
    ```
 
+También se puede publicar sin crear el tag a mano: Actions → "Publicar" → "Run workflow" sobre `main`. Toma la
+versión del pom y, si la publicación sale bien, crea el tag `v{version}`.
+
 El workflow [`publicar.yml`](.github/workflows/publicar.yml) verifica que el tag coincida con la versión, corre los
 tests y publica `core-parent` y todos los módulos (con su jar de fuentes) en la rama `gh-pages`, que GitHub Pages sirve
 como repositorio Maven. Una versión publicada no se vuelve a publicar: si hay que corregirla, se publica una nueva.

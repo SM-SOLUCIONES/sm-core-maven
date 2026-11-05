@@ -1,6 +1,9 @@
 # Publica una version del Core en el repositorio Maven publico https://sm-soluciones.github.io/sm-core-maven.
 #
-# Se dispara al pushear un tag v{version} (ej. v4.0.0) que coincide con el <version> y el core.version del pom raiz.
+# Dos formas de dispararlo:
+# - Pushear un tag v{version} (ej. v4.0.0) que coincide con el <version> y el core.version del pom raiz.
+# - A mano desde Actions ("Run workflow") sobre main: toma la version del pom y, si publica bien, crea el tag
+#   v{version} sobre ese commit.
 # Compila, corre los tests y hace "mvn deploy" a la rama gh-pages, que GitHub Pages sirve como repositorio Maven.
 # Una version ya publicada no se pisa: el workflow falla y hay que publicar una version nueva.
 name: Publicar
@@ -8,6 +11,7 @@ name: Publicar
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 concurrency:
   group: publicar
@@ -28,13 +32,26 @@ jobs:
           java-version: '25'
           cache: maven
 
-      - name: El tag coincide con la version del pom
+      - name: La version del pom es coherente con lo que se publica
         run: |
           version="$(mvn -B -q help:evaluate -Dexpression=project.version -DforceStdout)"
           core="$(mvn -B -q help:evaluate -Dexpression=core.version -DforceStdout)"
-          echo "Tag: ${GITHUB_REF_NAME} | <version>: ${version} | core.version: ${core}"
-          if [ "v${version}" != "${GITHUB_REF_NAME}" ] || [ "${version}" != "${core}" ]; then
-            echo "::error::El tag tiene que ser v<version> y core.version tiene que ser igual a <version> (ver README -> Publicar una version)"
+          echo "Evento: ${GITHUB_EVENT_NAME} | ref: ${GITHUB_REF} | <version>: ${version} | core.version: ${core}"
+          if [ "${version}" != "${core}" ]; then
+            echo "::error::core.version tiene que ser igual a <version> (ver README -> Publicar una version)"
+            exit 1
+          fi
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
+              echo "::error::A mano solo se publica desde main"
+              exit 1
+            fi
+            if git ls-remote --exit-code --tags origin "refs/tags/v${version}" >/dev/null; then
+              echo "::error::El tag v${version} ya existe. Una version publicada no se pisa: subir la version."
+              exit 1
+            fi
+          elif [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "::error::El tag tiene que ser v<version> (ver README -> Publicar una version)"
             exit 1
           fi
           echo "VERSION=${version}" >> "$GITHUB_ENV"
@@ -68,3 +85,11 @@ jobs:
           git add -A
           git commit -m "Publica core ${VERSION}"
           git push origin gh-pages
+
+      - name: Crear el tag (solo si se disparo a mano)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${VERSION}" -m "Core ${VERSION}"
+          git push origin "v${VERSION}"
