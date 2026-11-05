@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Contrato de endpoint generado por core-test desde las pruebas de contrato. No se edita a mano. -->
+    <title>{{TITULO}}</title>
+    <style>
+        body { margin: 0; padding: 0; }
+    </style>
+</head>
+<body>
+<div id="contrato"></div>
+<!-- Redoc 2.5.4 (MIT) empaquetado en core-test: la intranet no tiene salida a internet -->
+<script>{{REDOC}}</script>
+<script>
+    Redoc.init({{SPEC}}, {
+        expandResponses: "200",
+        jsonSampleExpandLevel: 3,
+        sortTagsAlphabetically: true,
+        hideDownloadButton: false
+    }, document.getElementById("contrato"));
+</script>
+</body>
+</html>

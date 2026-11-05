@@ -1,0 +1,341 @@
+# Schema de core-protocolo-jwt: refresh tokens.
+databaseChangeLog:
+  # Usuarios en espanol (glosario, ticket 06). core-identity renombra auth_users a auth_usuarios antes de que corra
+  # este changelog. En una base nueva este changeset crea auth_jwt_refresh_tokens con la FK hacia auth_usuarios (el
+  # nombre de la FK queda [D15]) y 2026-07-06-create-initial-schema-11, que la apunta a auth_users, queda MARK_RAN por su
+  # precondicion. En una base existente la tabla ya existe (su FK sigue a la tabla renombrada) y este queda MARK_RAN.
+  # Su rollback no hace nada: Liquibase tambien revierte los changesets MARK_RAN, y la tabla la borra el rollback de
+  # 2026-07-06-create-initial-schema-11 (en una base nueva queda MARK_RAN despues de este, asi que se revierte antes).
+  - changeSet:
+      id: 2026-10-09-create-auth-jwt-refresh-tokens-fk-auth-usuarios
+      author: TaielMG
+      comment: Crea tabla auth_jwt_refresh_tokens con la FK hacia auth_usuarios (base nueva)
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: auth_usuarios
+        - not:
+            - tableExists:
+                tableName: auth_jwt_refresh_tokens
+      changes:
+        - createTable:
+            tableName: auth_jwt_refresh_tokens
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: status
+                  type: TINYINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uuid
+                  type: CHAR(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expiry_date
+                  type: DATETIME(6)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: token
+                  type: VARCHAR(1024)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: id_user_created
+                  type: BIGINT
+              - column:
+                  name: id_user_updated
+                  type: BIGINT
+              - column:
+                  name: id_user_deleted
+                  type: BIGINT
+              - column:
+                  name: date_created
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_updated
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_deleted
+                  type: TIMESTAMP
+        - addUniqueConstraint:
+            tableName: auth_jwt_refresh_tokens
+            columnNames: uuid
+            constraintName: uk_auth_jwt_refresh_tokens_uuid
+        - addUniqueConstraint:
+            tableName: auth_jwt_refresh_tokens
+            columnNames: token
+            constraintName: uk_auth_jwt_refresh_tokens_token
+        - addForeignKeyConstraint:
+            baseTableName: auth_jwt_refresh_tokens
+            baseColumnNames: user_id
+            referencedTableName: auth_usuarios
+            referencedColumnNames: id
+            constraintName: fk_auth_jwt_refresh_tokens_user
+      rollback:
+        - output:
+            message: Sin efecto. La tabla la borra el rollback de 2026-07-06-create-initial-schema-11
+
+  - changeSet:
+      id: 2026-07-06-create-initial-schema-11
+      author: TaielMG
+      comment: Crea tabla auth_jwt_refresh_tokens
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          - tableExists:
+              tableName: auth_jwt_refresh_tokens
+      changes:
+        - createTable:
+            tableName: auth_jwt_refresh_tokens
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: status
+                  type: TINYINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uuid
+                  type: CHAR(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expiry_date
+                  type: DATETIME(6)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: token
+                  type: VARCHAR(1024)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: id_user_created
+                  type: BIGINT
+              - column:
+                  name: id_user_updated
+                  type: BIGINT
+              - column:
+                  name: id_user_deleted
+                  type: BIGINT
+              - column:
+                  name: date_created
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_updated
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_deleted
+                  type: TIMESTAMP
+        - addUniqueConstraint:
+            tableName: auth_jwt_refresh_tokens
+            columnNames: uuid
+            constraintName: uk_auth_jwt_refresh_tokens_uuid
+        - addUniqueConstraint:
+            tableName: auth_jwt_refresh_tokens
+            columnNames: token
+            constraintName: uk_auth_jwt_refresh_tokens_token
+        - addForeignKeyConstraint:
+            baseTableName: auth_jwt_refresh_tokens
+            baseColumnNames: user_id
+            referencedTableName: auth_users
+            referencedColumnNames: id
+            constraintName: fk_auth_jwt_refresh_tokens_user
+      rollback:
+        - dropForeignKeyConstraint:
+            baseTableName: auth_jwt_refresh_tokens
+            constraintName: fk_auth_jwt_refresh_tokens_user
+        - dropTable:
+            tableName: auth_jwt_refresh_tokens
+
+  # Auditoria en espanol (glosario, ticket 02): auth_jwt_refresh_tokens
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-jwt-refresh-tokens-1
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_created de auth_jwt_refresh_tokens a id_usuario_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_jwt_refresh_tokens
+          columnName: id_user_created
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN id_user_created TO id_usuario_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN id_usuario_de_creacion TO id_user_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-jwt-refresh-tokens-2
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_updated de auth_jwt_refresh_tokens a id_usuario_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_jwt_refresh_tokens
+          columnName: id_user_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN id_user_updated TO id_usuario_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN id_usuario_de_actualizacion TO id_user_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-jwt-refresh-tokens-3
+      author: TaielMG
+      comment: Renombra la columna de auditoria id_user_deleted de auth_jwt_refresh_tokens a id_usuario_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_jwt_refresh_tokens
+          columnName: id_user_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN id_user_deleted TO id_usuario_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN id_usuario_de_borrado TO id_user_deleted
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-jwt-refresh-tokens-4
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_created de auth_jwt_refresh_tokens a fecha_de_creacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_jwt_refresh_tokens
+          columnName: date_created
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN date_created TO fecha_de_creacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN fecha_de_creacion TO date_created
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-jwt-refresh-tokens-5
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_updated de auth_jwt_refresh_tokens a fecha_de_actualizacion
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_jwt_refresh_tokens
+          columnName: date_updated
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN date_updated TO fecha_de_actualizacion
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN fecha_de_actualizacion TO date_updated
+
+  - changeSet:
+      id: 2026-10-09-renombrar-auditoria-auth-jwt-refresh-tokens-6
+      author: TaielMG
+      comment: Renombra la columna de auditoria date_deleted de auth_jwt_refresh_tokens a fecha_de_borrado
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_jwt_refresh_tokens
+          columnName: date_deleted
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN date_deleted TO fecha_de_borrado
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN fecha_de_borrado TO date_deleted
+
+  # Refresh tokens en espanol (glosario, ticket 08). La tabla queda (JWT + RefreshToken, prefijo auth_ [D12]) y la
+  # columna token tambien [D8]; se traducen expiry_date y user_id. Los refresh tokens emitidos antes de migrar siguen
+  # valiendo: solo cambia el nombre de las columnas.
+  - changeSet:
+      id: 2026-10-09-renombrar-jwt-refresh-tokens-1
+      author: TaielMG
+      comment: Renombra la columna expiry_date de auth_jwt_refresh_tokens a fecha_de_vencimiento
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_jwt_refresh_tokens
+          columnName: expiry_date
+      changes:
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN expiry_date TO fecha_de_vencimiento
+      rollback:
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN fecha_de_vencimiento TO expiry_date
+
+  # La FK se saca y se vuelve a crear con el mismo nombre [D15] alrededor del RENAME COLUMN: en MariaDB el unique de
+  # token (VARCHAR(1024)) es un indice USING HASH sobre una columna virtual oculta, eso obliga a ALGORITHM=COPY en
+  # cualquier ALTER de la tabla, y COPY no admite renombrar una columna que participa de una FK (error 1846).
+  - changeSet:
+      id: 2026-10-09-renombrar-jwt-refresh-tokens-2
+      author: TaielMG
+      comment: Renombra la columna user_id de auth_jwt_refresh_tokens a id_usuario
+      preConditions:
+        onFail: MARK_RAN
+        columnExists:
+          tableName: auth_jwt_refresh_tokens
+          columnName: user_id
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: auth_jwt_refresh_tokens
+            constraintName: fk_auth_jwt_refresh_tokens_user
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN user_id TO id_usuario
+        - addForeignKeyConstraint:
+            baseTableName: auth_jwt_refresh_tokens
+            baseColumnNames: id_usuario
+            referencedTableName: auth_usuarios
+            referencedColumnNames: id
+            constraintName: fk_auth_jwt_refresh_tokens_user
+      rollback:
+        - dropForeignKeyConstraint:
+            baseTableName: auth_jwt_refresh_tokens
+            constraintName: fk_auth_jwt_refresh_tokens_user
+        - sql:
+            sql: ALTER TABLE auth_jwt_refresh_tokens RENAME COLUMN id_usuario TO user_id
+        - addForeignKeyConstraint:
+            baseTableName: auth_jwt_refresh_tokens
+            baseColumnNames: user_id
+            referencedTableName: auth_usuarios
+            referencedColumnNames: id
+            constraintName: fk_auth_jwt_refresh_tokens_user
