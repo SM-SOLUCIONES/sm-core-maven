@@ -67,6 +67,19 @@ class AuthJwtServiceTest {
     }
 
     @Test
+    void validarSecreto_sinJwtSecreto_cortaElArranque() {
+        ReflectionTestUtils.setField(authJwtService, "secretoJwt", "");
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, authJwtService::validarSecreto);
+        assertTrue(ex.getMessage().contains("jwt.secreto"));
+    }
+
+    @Test
+    void validarSecreto_conJwtSecreto_noLanza() {
+        assertDoesNotThrow(authJwtService::validarSecreto);
+    }
+
+    @Test
     void getUsuario_tokenEs256_respondeNullSinConsultarLaBase() {
         enviarBearer(tokenEs256());
 

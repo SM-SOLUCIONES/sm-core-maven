@@ -15,6 +15,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,7 +45,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthJwtService implements EstrategiaDeAutenticacion {
 
-    @Value("${jwt.secreto:defaultSecretKeyThatIsVeryLongAndSecureEnoughForHS256AlgorithmToWorkProperly1234567890}")
+    // Sin default desde 4.0.0: el codigo del Core es publico y un secreto por defecto lo conoceria cualquiera
+    @Value("${jwt.secreto:}")
     private String secretoJwt;
 
     private final long vencimientoDelTokenMs = 300000; // 5 minutos
@@ -64,6 +66,16 @@ public class AuthJwtService implements EstrategiaDeAutenticacion {
     @Override
     public String getProtocolo() {
         return "jwt";
+    }
+
+    // Corta el arranque si el proyecto declara core-protocolo-jwt sin jwt.secreto: firmar con un secreto vacio o
+    // conocido permitiria a cualquiera emitir tokens validos. Lanza IllegalStateException con la propiedad faltante
+    @PostConstruct
+    void validarSecreto() {
+        if (secretoJwt == null || secretoJwt.isBlank()) {
+            throw new IllegalStateException("Falta la propiedad jwt.secreto: core-protocolo-jwt la necesita para firmar"
+                    + " y validar los JWT (HS256, al menos 32 caracteres). No tiene valor por defecto desde Core 4.0.0.");
+        }
     }
 
     private Key getClaveDeFirma() {
